@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CSS Injector</title>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0e11;
+      --surface:   #17171c;
+      --border:    #2a2a35;
+      --accent:    #7b6cff;
+      --accent2:   #00e5c0;
+      --danger:    #ff5f5f;
+      --text:      #e8e6f0;
+      --muted:     #666680;
+      --mono:      'JetBrains Mono', monospace;
+      --display:   'Syne', sans-serif;
+    }
+
+    html, body {
+      width: 380px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .brand-icon {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 7px;
+      display: grid; place-items: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-family: var(--display);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .domain-badge {
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Enable switch ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 12px 0;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      font-size: 11.5px;
+    }
+    .toggle-row .hint { color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .toggle-row + .toggle-row { margin-top: 8px; }
+
+    .switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+    .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+    .switch .track {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 20px;
+      transition: background .2s;
+    }
+    .switch .track::after {
+      content: "";
+      position: absolute; top: 3px; left: 3px;
+      width: 14px; height: 14px;
+      background: var(--text);
+      border-radius: 50%;
+      transition: transform .2s;
+    }
+    .switch input:checked + .track { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .switch input:checked + .track::after { transform: translateX(16px); }
+    .switch input:focus-visible + .track { box-shadow: 0 0 0 3px rgba(123,108,255,.35); }
+    .switch input:disabled { cursor: not-allowed; }
+    .switch input:disabled + .track { opacity: .4; }
+
+    /* ── Editor area ── */
+    .editor-wrapper {
+      position: relative;
+      margin: 12px 12px 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--surface);
+      transition: border-color .2s;
+    }
+    .editor-wrapper:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(123,108,255,.12);
+    }
+
+    .editor-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .editor-label .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+    .dot-red   { background: #ff5f57; }
+    .dot-amber { background: #febc2e; }
+    .dot-green { background: #28c840; }
+
+    textarea {
+      width: 100%;
+      height: 220px;
+      padding: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.7;
+      border: none;
+      outline: none;
+      resize: none;
+      tab-size: 2;
+      caret-color: var(--accent2);
+    }
+
+    textarea::placeholder { color: var(--muted); }
+
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 12px;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background .3s;
+    }
+    .status-dot.active  { background: var(--accent2); }
+    .status-dot.saved   { background: var(--accent); }
+    .status-dot.error   { background: var(--danger); }
+
+    /* ── External resources warning ── */
+    .ext-warning {
+      margin: 8px 12px 0;
+      padding: 7px 10px;
+      border: 1px solid #5a4a1f;
+      border-radius: 7px;
+      background: rgba(254,188,46,.08);
+      color: #febc2e;
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+    .ext-warning[hidden] { display: none; }
+
+    /* ── Buttons ── */
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 10px 12px 14px;
+    }
+
+    button {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 7px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active { transform: scale(.97); }
+
+    #btn-save {
+      background: linear-gradient(135deg, var(--accent), #9b8dff);
+      color: #fff;
+      grid-column: 1;
+    }
+
+    #btn-clear {
+      background: var(--surface);
+      color: var(--danger);
+      border: 1px solid var(--border);
+      grid-column: 2;
+    }
+
+    #btn-save:hover  { opacity: .88; }
+    #btn-clear:hover { border-color: var(--danger); }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 14px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #toast.error { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">✦</div>
+    <span class="brand-name">CSS Injector</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="domain-badge" id="domain-display">loading…</span>
+    <button id="btn-settings" title="Settings" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:13px;font-family:var(--mono)">⚙</button>
+  </div>
+</header>
+
+<label class="toggle-row" for="toggle-enabled">
+  <span>
+    <span id="toggle-label">Styles enabled on this site</span>
+    <div class="hint">Turn off to view the original page</div>
+  </span>
+  <span class="switch">
+    <input type="checkbox" id="toggle-enabled" role="switch" checked />
+    <span class="track"></span>
+  </span>
+</label>
+
+<label class="toggle-row" for="toggle-notice">
+  <span>
+    <span>Show notice on pages (all sites)</span>
+    <div class="hint">Off: only the ON badge on the toolbar icon, invisible to sites.<br>Pin the icon to the toolbar to see it.</div>
+  </span>
+  <span class="switch">
+    <input type="checkbox" id="toggle-notice" role="switch" />
+    <span class="track"></span>
+  </span>
+</label>
+
+<div class="editor-wrapper">
+  <div class="editor-label">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-amber"></span>
+    <span class="dot dot-green"></span>
+    <span style="margin-left:4px">custom stylesheet</span>
+  </div>
+  <textarea
+    id="css-input"
+    spellcheck="false"
+    autocomplete="off"
+    placeholder="/* Write your CSS here */&#10;&#10;body {&#10;  font-size: 18px !important;&#10;}"
+  ></textarea>
+  <div class="status-bar">
+    <span class="status-indicator">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">no styles saved</span>
+    </span>
+    <span id="char-count">0 chars</span>
+  </div>
+</div>
+
+<div class="ext-warning" id="external-warning" role="alert" hidden>
+  ⚠ This CSS loads external resources (url(), @import). Combined with
+  selectors it can leak page data to a remote server. Only use CSS you trust.
+</div>
+
+<div class="actions">
+  <button id="btn-save">💾 Save &amp; Apply</button>
+  <button id="btn-clear">✕ Clear</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>

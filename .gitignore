@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Packaged builds
+*.zip
+*.xpi
+web-ext-artifacts/
+
+# Dependencies
+node_modules/
