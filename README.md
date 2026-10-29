@@ -17,7 +17,7 @@ A lightweight Firefox extension to add your own CSS to any website. Styles are s
 
 ## Requirements
 
-- **Firefox 142 or later** (desktop).
+- **Firefox 140 or later** (desktop, including Firefox ESR 140).
 
 ## Installation
 
